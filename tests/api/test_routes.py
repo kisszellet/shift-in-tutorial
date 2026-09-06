@@ -2,10 +2,13 @@
 input validation lives in tests/unit/test_models.py; this layer only proves
 the HTTP wiring calls the right thing and shapes the response correctly
 (docs/test-strategy.md: "one or two tests per endpoint, not per case")."""
+from datetime import datetime, timedelta, timezone
+
 from fastapi.testclient import TestClient
 
 from snip.main import app
 from snip.shortener import CODE_LENGTH
+from snip.shortener import create_link as shortener_create_link
 
 client = TestClient(app)
 
@@ -49,3 +52,19 @@ def test_stats_reflects_follow_count():
     client.get(f"/{code}", follow_redirects=False)
     resp = client.get(f"/api/links/{code}/stats")
     assert resp.json()["clicks"] == 2
+
+
+def test_create_link_rejects_past_expiry_with_422():
+    past = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    resp = client.post("/api/links", json={"url": "https://example.com", "expires_at": past})
+    assert resp.status_code == 422
+
+
+def test_follow_expired_link_returns_410():
+    # The API itself rejects a past expires_at at creation time (Rule 2), so
+    # to test the follow-side wiring we go around it via the shortener layer
+    # directly - deterministic, no real sleep needed to "wait for expiry."
+    past = datetime.now(timezone.utc) - timedelta(seconds=1)
+    record = shortener_create_link("https://example.com", expires_at=past)
+    resp = client.get(f"/{record.code}", follow_redirects=False)
+    assert resp.status_code == 410

@@ -1,15 +1,11 @@
 # snip
 
-A tiny URL shortener — the **starter application** for the Shift In tutorial. Past M5a: the full
-test pyramid exists — unit, API, one SLI-derived CI gate, and Robot Framework system tests in
-`tests/system/`, maintained by the `system-test-writer` subagent
-(`.claude/agents/system-test-writer.md`) rather than written inline. CI (`.github/workflows/ci.yml`)
-runs the fast suite and the system suite as two parallel jobs. `CLAUDE.md` is at v2. See
-`docs/test-strategy.md` for the full shape.
-
-The next feature (link expiry, [issue #2](https://github.com/kisszellet/shift-in-tutorial/issues/2))
-has been through Example Mapping (`.claude/skills/example-mapping/`) — refined acceptance criteria
-in `docs/link-expiry-acceptance-criteria.md`. Not built yet; that's M5b.
+A tiny URL shortener — the **starter application** for the Shift In tutorial. This branch is the
+finale: the full quality pyramid (unit, API, one SLI-derived CI gate, Robot Framework system
+tests), a `Stop` hook, and two working agents (`system-test-writer`, `example-mapping`) all in
+place *before* the link-expiry feature ([issue #2](https://github.com/kisszellet/shift-in-tutorial/issues/2))
+got built with them — tests generated and run in-loop, not bolted on after. See
+`docs/link-expiry-acceptance-criteria.md` for the acceptance criteria this was built against.
 
 ## Run it
 
@@ -43,10 +39,10 @@ robot --outputdir robot-results tests/system/ # system tests, real server, real 
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/api/links` | Create a short link from `{ "url": "..." }` |
+| POST | `/api/links` | Create a short link from `{ "url": "...", "expires_at": "..." }` (`expires_at` optional) |
 | GET | `/api/links` | List links |
 | GET | `/api/links/{code}/stats` | Click stats for a code |
-| GET | `/{code}` | Follow a short link (redirect) |
+| GET | `/{code}` | Follow a short link (redirect, `404` if unknown, `410` if expired) |
 
 ## Where to look
 

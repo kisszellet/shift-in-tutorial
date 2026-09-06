@@ -14,8 +14,8 @@ short link is followed.
 
 ## Core capabilities (current)
 
-1. Create a short link from a long URL.
-2. Follow a short link (redirect to the original URL).
+1. Create a short link from a long URL, optionally with an expiry (M5b).
+2. Follow a short link (redirect to the original URL, or `410 Gone` if expired).
 3. List existing links.
 4. See click stats for a link.
 
@@ -32,7 +32,8 @@ short link is followed.
 - SLI-affecting changes are reflected in the pipeline gates.
 - Observable behaviour changes are covered by at least one higher-level test.
 
-## Known roadmap item (used in M5)
+## Link expiry (built in M5)
 
-**Link expiry:** owners want links that stop working after a chosen time. This is the feature
-built during the M5 finale via Example Mapping + an agent build.
+Owners can set an expiry on a short link; it stops resolving after that time. Went through
+Example Mapping (M5a, `docs/link-expiry-acceptance-criteria.md`) before being built (M5b) — see
+that doc for the confirmed rules and scenarios.

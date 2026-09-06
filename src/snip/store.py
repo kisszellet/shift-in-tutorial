@@ -1,6 +1,7 @@
 """In-memory storage. Not persistent — fine for a workshop starter."""
 
 from dataclasses import dataclass, field
+from datetime import datetime
 
 
 class LinkNotFoundError(Exception):
@@ -13,6 +14,7 @@ class LinkRecord:
     code: str
     url: str
     clicks: int = 0
+    expires_at: datetime | None = None
 
 
 @dataclass

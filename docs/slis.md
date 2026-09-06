@@ -6,7 +6,7 @@ Targets are deliberately modest so a workshop pipeline can check them.
 | # | SLI | Definition | Target (SLO) |
 |---|-----|------------|--------------|
 | 1 | **Redirect latency** | p95 server time to answer `GET /{code}` | < 50 ms |
-| 2 | **Redirect availability** | share of `GET /{code}` returning a valid redirect or a correct 404 | ≥ 99.9% |
+| 2 | **Redirect availability** | share of `GET /{code}` returning a valid redirect, a correct 404 (unknown code), or a correct 410 (expired link, M5b) | ≥ 99.9% |
 | 3 | **Resolve correctness** | share of follows that redirect to the exact stored URL | 100% |
 | 4 | **Create validation** | share of create requests with invalid/unsafe URLs that are correctly rejected | 100% |
 | 5 | **Stats accuracy** | recorded clicks equal actual follows | 100% |

@@ -1,4 +1,4 @@
-# Mutation testing notes (M3a)
+# Mutation testing notes (M3a, updated M5b)
 
 `docs/test-strategy.md` names `shortener.py` as mutmut's target — it carries the highest-risk
 logic (validation, collision handling, lookup). Run it with:
@@ -57,3 +57,27 @@ Re-ran mutmut: **19/19 killed.**
 A green coverage report answers "did this line run?" — not "would we notice if it broke?" Treat a
 surviving mutant as a missing assertion until you've concretely shown otherwise (an equivalent
 mutant that can't change observable behavior is possible in principle, but wasn't the case here).
+
+## M5b: the same lesson showed up twice more in one feature
+
+Building link expiry added real logic to `resolve()` — a comparison and an exception. First run:
+**24 of 26 mutants killed, 2 survived.**
+
+**Survivor 1 — boundary operator:** `record.expires_at <= datetime.now(...)` mutated to `<`. Every
+test used a clearly-past timestamp (`now - 1 second`), so `<=` vs `<` made no difference to any of
+them — the exact instant of expiry was never exercised. Fixed by freezing "now" (`monkeypatch` on
+`shortener.datetime`) and constructing a record whose `expires_at` exactly equals it, then
+asserting that still raises. Without this, a future refactor could silently make links valid
+"through" their expiry instant instead of "up to and not including" it, and nothing would catch it.
+
+**Survivor 2 — exception payload:** `raise LinkExpiredError(code)` mutated to
+`raise LinkExpiredError(None)`. The test only checked *that* a `LinkExpiredError` was raised
+(`pytest.raises(LinkExpiredError)`), never *which* code it carried — the same class of gap as the
+`None`-short-code mutant above, just on an exception's payload instead of a return value. Fixed by
+asserting `str(exc_info.value) == record.code`.
+
+Second run: **26/26 killed.**
+
+Same root cause both times: `pytest.raises(SomeError)` alone proves an error type, not that the
+error is *correct*. If the exception (or the mutated code path) can carry meaningfully different
+content, assert on the content too.

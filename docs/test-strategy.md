@@ -39,7 +39,7 @@ actually needs a live process, not a place to restate what unit/API/system alrea
 | SLI | Primary level | Notes |
 |---|---|---|
 | Redirect latency (p95 < 50 ms) | CI gate (M3b) — `tests/gates/` | Needs a real running process; a unit test can't measure server-side latency meaningfully. Turned out lightweight enough to gate directly: spins up uvicorn, samples 50 real requests, measures p95 client-side over loopback. Not part of the Stop hook (M3a) — deliberately kept out of the fast in-loop path; CI is where a heavier check like this belongs. |
-| Redirect availability (valid redirect or correct 404) | Unit | `resolve()` behaviour for known vs. unknown codes is a pure function test — no server needed. |
+| Redirect availability (valid redirect, correct 404, or correct 410 once expired) | Unit | `resolve()` behaviour for known, unknown, and expired codes is a pure function test — no server needed. |
 | Resolve correctness (exact URL match) | Unit | Create-then-resolve round trip on the store/shortener layer. |
 | Create validation (unsafe/invalid URLs rejected) | Unit | Table-driven tests over valid/invalid/unsafe URL inputs against `create_link`. Highest-value suite in the app — this is where the one significant security risk lives. |
 | Stats accuracy (clicks = follows) | Unit, plus one system check | Unit: click counter increments correctly per resolve call. System: one end-to-end "follow N times, check stats" flow, since it crosses the create/follow/stats boundary. |

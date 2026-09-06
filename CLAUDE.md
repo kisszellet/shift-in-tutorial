@@ -25,7 +25,7 @@ snip turns them into short codes and counts how often each is followed. Full con
 | SLI | Target |
 |---|---|
 | Redirect latency (p95, `GET /{code}`) | < 50 ms |
-| Redirect availability (valid redirect or correct 404) | ≥ 99.9% |
+| Redirect availability (valid redirect, correct 404, or correct 410 once expired) | ≥ 99.9% |
 | Resolve correctness (redirects to exact stored URL) | 100% |
 | Create validation (unsafe/invalid URLs correctly rejected) | 100% |
 | Stats accuracy (recorded clicks = actual follows) | 100% |
@@ -43,8 +43,13 @@ are SLI violations, not style issues.
   target distribution. Before adding a system test, check whether `tests/unit/` or `tests/api/`
   already prove it; if so, that's the pyramid-inversion anti-pattern, not thoroughness.
 - **Delegate system tests to the `system-test-writer` subagent** (`.claude/agents/system-test-writer.md`)
-  rather than writing `tests/system/*.robot` inline. It's scoped to keep that layer thin — use it
-  when a change affects end-to-end behaviour on the redirect hot path.
+  rather than writing `tests/system/*.robot` inline. Its actual bar (not just "touches the redirect
+  hot path" — that looser wording is how M4's first draft ended up with two suites that turned out
+  to be exact restatements of `tests/api/`, caught in review and deleted): does this behaviour need
+  a real process boundary to prove, something `tests/api/`'s `TestClient` genuinely cannot exercise?
+  If `tests/api/` already proves it — even for a new feature on the hot path, as M5b's 410 status
+  code was — that's the pyramid-inversion anti-pattern, not thoroughness. M5b deliberately added no
+  system test for exactly this reason.
 - **DoD (excerpt — full version in `docs/business-context.md`):** reviewed and merged via PR;
   tests exist at the appropriate level(s) and pass in CI; SLI-affecting changes are reflected in
   pipeline gates; observable behaviour changes are covered by at least one higher-level test.
