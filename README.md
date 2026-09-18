@@ -1,7 +1,8 @@
 # snip
 
-A tiny URL shortener — the **starter application** for the Shift In tutorial. This is the `start`
-state: it runs, but it has **no tests, no CI, and no AI tooling yet**. That is the point.
+A tiny URL shortener — the **starter application** for the Shift In tutorial. Past M2: a first
+AI-reviewed PR has landed (see `docs/github-cli-notes.md`), but there are **still no tests and no
+CI** — both arrive in M3a.
 
 ## Run it
 

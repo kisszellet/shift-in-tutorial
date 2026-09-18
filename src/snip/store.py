@@ -3,6 +3,11 @@
 from dataclasses import dataclass, field
 
 
+class LinkNotFoundError(Exception):
+    """Raised when a code has no matching link. Callers at the HTTP boundary
+    translate this into a 404 — see main.py's exception handler."""
+
+
 @dataclass
 class LinkRecord:
     code: str
@@ -18,7 +23,10 @@ class Store:
         self._links[record.code] = record
 
     def get(self, code: str) -> LinkRecord:
-        return self._links[code]
+        try:
+            return self._links[code]
+        except KeyError:
+            raise LinkNotFoundError(code) from None
 
     def exists(self, code: str) -> bool:
         return code in self._links
