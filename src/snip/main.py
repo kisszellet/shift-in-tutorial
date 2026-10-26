@@ -5,7 +5,7 @@ Run locally:
 OpenAPI docs at /docs, schema at /openapi.json
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 
 from . import shortener
@@ -27,11 +27,17 @@ def list_links() -> list[LinkResponse]:
 
 @app.get("/api/links/{code}/stats", response_model=LinkResponse)
 def link_stats(code: str) -> LinkResponse:
-    record = shortener.stats(code)
+    try:
+        record = shortener.stats(code)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Link not found")
     return LinkResponse.from_record(record)
 
 
 @app.get("/{code}")
 def follow(code: str) -> RedirectResponse:
-    record = shortener.resolve(code)
+    try:
+        record = shortener.resolve(code)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Link not found")
     return RedirectResponse(url=record.url, status_code=307)
