@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Step 1 -- production-only install.
+      # Everything else in this job installs the "test" extra (pytest, httpx, ...),
+      # and those packages can quietly satisfy an import that the app's real
+      # dependencies don't provide. A dependency missing from [project.dependencies]
+      # would then pass every test and still crash on a clean production install.
+      # Installing without extras, as a regular (non-editable) install, and importing
+      # from outside the repo catches both that and a broken package layout.
+      - name: "1. Install production dependencies only and check the app imports"
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+          cd "$RUNNER_TEMP"
+          python -c "import snip.main; print('imported', snip.main.__file__)"
+
+      # Step 2 -- fast tests: unit and API. Same scope as the local Stop hook.
+      - name: "2. Unit and API tests"
+        run: |
+          python -m pip install -e ".[test]"
+          python -m pytest tests/unit tests/api -q
+
+      # Step 3 -- SLI gate: SLI 1, p95 redirect latency < 50 ms (docs/slis.md),
+      # against a real uvicorn server. -s keeps the measured p95 in the log.
+      - name: "3. SLI gate: redirect latency"
+        run: python -m pytest tests/gates -q -s

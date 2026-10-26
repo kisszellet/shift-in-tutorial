@@ -15,6 +15,8 @@ def generate_code() -> str:
 
 def create_link(url: str) -> LinkRecord:
     code = generate_code()
+    while store.exists(code):
+        code = generate_code()
     record = LinkRecord(code=code, url=url)
     store.put(record)
     return record

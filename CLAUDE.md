@@ -3,6 +3,7 @@
 snip is an internal URL shortener: teams paste long links into chat, docs and slides, and snip
 turns them into short codes and counts how often each is followed. Source in `src/snip/`.
 Run: `uvicorn snip.main:app --reload --app-dir src` (activate `.venv` first).
+Test: `pip install -e ".[test]"` once, then `pytest tests/unit tests/api`.
 
 What "good" means lives in `docs/` — [business-context.md](docs/business-context.md),
 [quality-characteristics.md](docs/quality-characteristics.md), [slis.md](docs/slis.md). This file
@@ -59,6 +60,8 @@ a *correct* outcome for SLI 2 — a 500 is not.
 - **Name the SLI.** For every change, state which SLIs (1–5) it touches. If it touches none, say so.
 - **SLI impact is part of acceptance criteria**, not an afterthought — including for new features.
 - **Don't claim an SLI is met on the strength of reading code.** Say which test or gate shows it.
+- **A turn never ends with a failing test.** If a test is red, fix it or say clearly that you
+  could not. An `xfail` that records a known open finding is not red; say which finding it is.
 - **Report SLI gaps you notice; don't silently fix or paper over them.** The table is a target and
   the current code may not meet it.
 - CI gates on SLIs: latency or correctness are the first gates to add. Don't loosen a target to
