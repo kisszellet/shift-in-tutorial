@@ -15,6 +15,16 @@ test = [
     "httpx",
 ]
 
+# System-level (Robot Framework) tests. Kept apart from "test" on purpose: the fast
+# job (unit + API tests, and the Stop hook) must not install them. They are heavy
+# next to the rest of the toolchain and only pay off against a running server, so
+# installing them in the fast job slows every run and lets a system-test package
+# mask a missing test dependency there. Install with: pip install -e ".[system]"
+system = [
+    "robotframework",
+    "robotframework-requests",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
